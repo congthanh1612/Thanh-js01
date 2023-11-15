@@ -24,6 +24,9 @@ function readVNnum(number){
         else if(ten===1){
             result+="mười";
         }
+        else if(ten===0){
+            result+="linh"+" ";
+        }
         if(digit>0 && ten!== 1){
             result+=words[digit]+" ";
         }
@@ -32,4 +35,4 @@ function readVNnum(number){
     let result = readPart(number);
     return result.trim();
 }
-console.log(readVNnum(2346));   
+console.log(readVNnum(2306));   
