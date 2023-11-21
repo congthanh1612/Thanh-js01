@@ -1,63 +1,75 @@
-var container = document.createElement("div");
-container.classList.add("cell");
-var colors = ['red','yellow','gray','blue','green','pink','black','purple','bisque','Azure',
-                'red','yellow','gray','blue','green','pink','black','purple','bisque','Azure']
-var shuffledColors = shuffleArray(colors.concat("orange")); 
+const cardContainer = document.querySelector(".cardContainer");
+const colors = ['red','yellow','gray','blue','green','pink','orange','purple','bisque','Azure'];
+const totalCard = 20;
+const colorsPicklist = [...colors, ...colors];
 
 
-var clickedSquares = [];
+let revealedCount = 0;
+let activeCard = null;
+let awaitingEndOfMove = false;
+for (let i = 0; i < totalCard; i++) {
+	const randomIndex = Math.floor(Math.random() * colorsPicklist.length);
+	const color = colorsPicklist[randomIndex];
+	const tile = buildCard(color);
 
-for (var i = 0; i < 20; i++) {
-    var square = document.createElement("div");
-    square.classList.add("square");
-    square.style.backgroundColor = 'orange'; 
-    container.appendChild(square);
-    var orderNumber=document.createTextNode(i+1);
-    square.appendChild(orderNumber);
-
-    square.addEventListener("click", function (event) {
-        var clickedSquare = event.target;
-
-        if (!clickedSquares.includes(clickedSquare)) {
-            clickedSquares.push(clickedSquare);
-            var newColor = shuffledColors[clickedSquares.length - 1];
-            clickedSquare.style.backgroundColor = newColor; 
-        }
-        if (clickedSquares.length === 2) {
-            setTimeout(function () {
-                clickedSquares.forEach(function (square) {
-                    square.style.backgroundColor = "orange"; 
-                }); 
-                clickedSquares = [];
-            }, 2000);
-        }
-    });
-}
-document.body.appendChild(container);
-
-function generateRandomColors(numColors) {
-    var colors = [];
-    for (var i = 0; i < numColors; i++) {
-        colors.push(getRandomColor());
-    }
-    return colors;
+	colorsPicklist.splice(randomIndex, 1);
+	cardContainer.appendChild(tile);
 }
 
-// Function to shuffle an array
-function shuffleArray(array) {
-    var shuffledArray = array.slice();
-    for (var i = shuffledArray.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
-    }
-    return shuffledArray;
+function buildCard(color) {
+	const element = document.createElement("div");
+
+	element.classList.add("card");
+	element.setAttribute("data-color", color);
+	element.setAttribute("data-revealed", "false");
+
+	element.addEventListener("click", () => {
+		const revealed = element.getAttribute("data-revealed");
+
+		if (
+			awaitingEndOfMove
+			|| revealed === "true"
+			|| element == activeCard
+		) {
+			return;
+		}
+
+		element.style.backgroundColor = color;
+
+		if (!activeCard) {
+			activeCard = element;
+
+			return;
+		}
+
+		const colorToMatch = activeCard.getAttribute("data-color");
+
+		if (colorToMatch === color) {
+			element.setAttribute("data-revealed", "true");
+			activeCard.setAttribute("data-revealed", "true");
+
+			activeCard = null;
+			awaitingEndOfMove = false;
+			revealedCount += 2;
+
+			if (revealedCount === totalCard) {
+				alert("You win 🎉! Refresh to start again.");
+			}
+
+			return;
+		}
+
+		awaitingEndOfMove = true;
+
+		setTimeout(() => {
+			activeCard.style.backgroundColor = null;
+			element.style.backgroundColor = null;
+
+			awaitingEndOfMove = false;
+			activeCard = null;
+		}, 1000);
+	});
+
+	return element;
 }
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
