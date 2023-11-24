@@ -11,11 +11,13 @@ function searchFilesByExtension(directory, extension, fileList = []) {
     if (checkFile.isDirectory()) {
       searchFilesByExtension(filePath, extension, fileList);
     } else if (path.extname(file).toLowerCase() === `.${extension.toLowerCase()}`) {
+      const fileName = extension.toLowerCase() === 'ts' ? path.parse(file).name : 'none';
+      // fileList.push(fileName);
       fileList.push(filePath);
     }
-  });
+  }); 
   return fileList;
-}
+} 
 
 function createIndexFile(files) {
   const srcPath = path.join(__dirname, 'src');
@@ -31,4 +33,7 @@ function createIndexFile(files) {
 
 const directoryToSearch = './src';
 const jsFiles = searchFilesByExtension(directoryToSearch, 'js');
-createIndexFile(jsFiles);
+const tsFiles = searchFilesByExtension(directoryToSearch, 'ts');
+const readFiles = jsFiles.concat(tsFiles);
+// createIndexFile(jsFiles);
+createIndexFile(readFiles);
